@@ -1,0 +1,1211 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GRE 단어장 학습 앱</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #4361ee;
+            --secondary-color: #3f37c9;
+            --accent-color: #4895ef;
+            --light-color: #f8f9fa;
+            --dark-color: #212529;
+            --success-color: #38b000;
+            --error-color: #d90429;
+            --gray-100: #f8f9fa;
+            --gray-200: #e9ecef;
+            --gray-300: #dee2e6;
+            --gray-400: #ced4da;
+            --gray-500: #adb5bd;
+            --gray-600: #6c757d;
+            --gray-700: #495057;
+            --gray-800: #343a40;
+            --gray-900: #212529;
+            --border-radius: 8px;
+            --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s ease;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Pretendard', 'Apple SD Gothic Neo', sans-serif;
+        }
+
+        body {
+            background-color: #f5f7fb;
+            color: var(--dark-color);
+            line-height: 1.6;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 2rem;
+            padding: 1.5rem;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            border-radius: var(--border-radius);
+            box-shadow: var(--box-shadow);
+        }
+
+        header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        header p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+
+        .tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            background-color: var(--gray-200);
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            color: var(--gray-700);
+            transition: var(--transition);
+        }
+
+        .tab-btn:hover {
+            background-color: var(--gray-300);
+        }
+
+        .tab-btn.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .content {
+            display: none;
+            background-color: white;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: var(--box-shadow);
+        }
+
+        .content.active {
+            display: block;
+            animation: fadeIn 0.5s ease;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* 단어 목록 스타일 */
+        .search-container {
+            margin-bottom: 1.5rem;
+        }
+
+        .search-input {
+            width: 100%;
+            padding: 12px 20px;
+            border: 2px solid var(--gray-300);
+            border-radius: var(--border-radius);
+            font-size: 1rem;
+            transition: var(--transition);
+        }
+
+        .search-input:focus {
+            outline: none;
+            border-color: var(--accent-color);
+            box-shadow: 0 0 0 3px rgba(67, 97, 238, 0.2);
+        }
+
+        .word-list {
+            margin-bottom: 1.5rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1rem;
+        }
+
+        .word-card {
+            background-color: var(--gray-100);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+            transition: var(--transition);
+            cursor: pointer;
+            border-left: 4px solid var(--primary-color);
+        }
+
+        .word-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .word-card h3 {
+            margin-bottom: 0.5rem;
+            color: var(--primary-color);
+            font-size: 1.3rem;
+        }
+
+        .word-card .meaning {
+            color: var(--gray-700);
+            font-size: 1rem;
+        }
+
+        .pagination {
+            display: flex;
+            justify-content: center;
+            gap: 0.5rem;
+            flex-wrap: wrap;
+        }
+
+        .pagination button {
+            padding: 8px 16px;
+            background-color: var(--gray-200);
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 500;
+            transition: var(--transition);
+        }
+
+        .pagination button:hover {
+            background-color: var(--gray-300);
+        }
+
+        .pagination button.active {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .no-results {
+            text-align: center;
+            padding: 2rem;
+            color: var(--gray-600);
+            font-size: 1.1rem;
+        }
+
+        /* 퀴즈 스타일 */
+        .quiz-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .quiz-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 1.5rem;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid var(--gray-300);
+        }
+
+        .quiz-progress {
+            font-size: 1.1rem;
+            font-weight: 500;
+            color: var(--gray-700);
+        }
+
+        .quiz-score {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .quiz-question {
+            margin-bottom: 1.5rem;
+            text-align: center;
+        }
+
+        .quiz-question h3 {
+            font-size: 1.4rem;
+            color: var(--gray-800);
+        }
+
+        .quiz-options {
+            display: grid;
+            gap: 1rem;
+            margin-bottom: 1.5rem;
+        }
+
+        .quiz-option {
+            padding: 1.2rem;
+            background-color: var(--gray-100);
+            border: 2px solid var(--gray-300);
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 1.1rem;
+        }
+
+        .quiz-option:hover {
+            background-color: var(--gray-200);
+        }
+
+        .quiz-option.selected {
+            border-color: var(--primary-color);
+        }
+
+        .quiz-option.correct {
+            background-color: rgba(56, 176, 0, 0.2);
+            border-color: var(--success-color);
+        }
+
+        .quiz-option.incorrect {
+            background-color: rgba(217, 4, 41, 0.2);
+            border-color: var(--error-color);
+        }
+
+        .quiz-feedback {
+            padding: 1rem;
+            margin-bottom: 1.5rem;
+            border-radius: var(--border-radius);
+            text-align: center;
+            font-weight: 500;
+            display: none;
+        }
+
+        .quiz-feedback.correct {
+            display: block;
+            background-color: rgba(56, 176, 0, 0.2);
+            color: var(--success-color);
+        }
+
+        .quiz-feedback.incorrect {
+            display: block;
+            background-color: rgba(217, 4, 41, 0.2);
+            color: var(--error-color);
+        }
+
+        .quiz-actions {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .quiz-btn {
+            padding: 12px 24px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-size: 1rem;
+            font-weight: 600;
+            transition: var(--transition);
+        }
+
+        .quiz-btn-next {
+            background-color: var(--primary-color);
+            color: white;
+        }
+
+        .quiz-btn-next:hover {
+            background-color: var(--secondary-color);
+        }
+
+        .quiz-btn-restart {
+            background-color: var(--accent-color);
+            color: white;
+        }
+
+        .quiz-btn-restart:hover {
+            background-color: #3a89ef;
+        }
+
+        .quiz-results {
+            display: none;
+            text-align: center;
+            padding: 2rem;
+            background-color: var(--gray-100);
+            border-radius: var(--border-radius);
+            margin-bottom: 1.5rem;
+        }
+
+        .quiz-results h2 {
+            margin-bottom: 1rem;
+            color: var(--gray-800);
+        }
+
+        .quiz-score-display {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        /* 통계 스타일 */
+        #stats {
+            padding: 2rem;
+        }
+
+        #stats h2 {
+            margin-bottom: 1.5rem;
+            color: var(--gray-800);
+            text-align: center;
+        }
+
+        #stats p {
+            margin-bottom: 1rem;
+            font-size: 1.1rem;
+            background-color: var(--gray-100);
+            padding: 1rem;
+            border-radius: var(--border-radius);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        #stats p span {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        /* 반응형 */
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 2rem;
+            }
+
+            .word-list {
+                grid-template-columns: 1fr;
+            }
+
+            .content {
+                padding: 1.5rem;
+            }
+
+            .quiz-question h3 {
+                font-size: 1.2rem;
+            }
+
+            .quiz-option {
+                padding: 1rem;
+                font-size: 1rem;
+            }
+        }
+
+        @media (max-width: 480px) {
+            header h1 {
+                font-size: 1.8rem;
+            }
+
+            header p {
+                font-size: 1rem;
+            }
+
+            .tab-btn {
+                padding: 10px 16px;
+                font-size: 0.9rem;
+                flex-grow: 1;
+            }
+
+            .quiz-header {
+                flex-direction: column;
+                gap: 0.5rem;
+                align-items: center;
+            }
+
+            .pagination button {
+                padding: 6px 12px;
+                font-size: 0.9rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>은체 단어장 학습 앱</h1>
+            <p>은체가 공부하고 있는 위한 필수 영어 단어를 학습하고 퀴즈로 실력을 테스트해보세요!</p>
+        </header>
+
+        <div class="tabs">
+            <button class="tab-btn active" data-tab="word-list">
+                <i class="fas fa-book"></i> 단어 목록
+            </button>
+            <button class="tab-btn" data-tab="quiz">
+                <i class="fas fa-question-circle"></i> 퀴즈 풀기
+            </button>
+            <button class="tab-btn" data-tab="stats">
+                <i class="fas fa-chart-bar"></i> 학습 통계
+            </button>
+        </div>
+
+        <div id="word-list" class="content active">
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="단어 또는 의미 검색...">
+            </div>
+            <div class="word-list" id="wordList"></div>
+            <div class="pagination" id="pagination"></div>
+        </div>
+
+        <div id="quiz" class="content">
+            <div class="quiz-container">
+                <div class="quiz-header">
+                    <div class="quiz-progress">문제 <span id="currentQuestion">1</span>/<span id="totalQuestions">10</span></div>
+                    <div class="quiz-score">점수: <span id="score">0</span></div>
+                </div>
+
+                <div class="quiz-question">
+                    <h3 id="questionText">문제가 여기에 표시됩니다.</h3>
+                </div>
+
+                <div class="quiz-options" id="options">
+                    <!-- 옵션들이 여기에 동적으로 추가됩니다 -->
+                </div>
+
+                <div class="quiz-feedback" id="feedback"></div>
+
+                <div class="quiz-actions">
+                    <button class="quiz-btn quiz-btn-next" id="nextBtn">다음 문제</button>
+                    <button class="quiz-btn quiz-btn-restart" id="restartBtn" style="display: none;">다시 시작</button>
+                </div>
+
+                <div class="quiz-results" id="results">
+                    <h2>퀴즈 결과</h2>
+                    <div class="quiz-score-display"><span id="finalScore">0</span>/<span id="maxScore">10</span></div>
+                    <p id="resultMessage">결과 메시지가 여기에 표시됩니다.</p>
+                    <button class="quiz-btn quiz-btn-restart" id="restartBtnResult">다시 시작</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="stats" class="content">
+            <h2>학습 통계</h2>
+            <p>총 학습 시간 <span id="totalStudyTime">0</span>분</p>
+            <p>총 학습한 단어 수 <span id="totalWordsStudied">0</span>개</p>
+            <p>정답률 <span id="accuracy">0</span>%</p>
+        </div>
+    </div>
+
+    <script>
+    
+// GRE 단어 데이터
+const greWords = [
+    {"word": "phrase", "meaning": "구, 문구"},
+    {"word": "describe", "meaning": "묘사하다, 설명하다"},
+    {"word": "clam", "meaning": "조개"},
+    {"word": "in good order", "meaning": "질서 정연한, 잘 정리된"},
+    {"word": "it's a piece of cake", "meaning": "식은 죽 먹기다, 아주 쉽다"},
+    {"word": "saying", "meaning": "속담, 격언"},
+    {"word": "cucumber", "meaning": "오이"},
+    {"word": "calm", "meaning": "차분한, 평온한"},
+    {"word": "confident", "meaning": "자신감 있는"},
+    {"word": "important", "meaning": "중요한"},
+    {"word": "age", "meaning": "나이, 시대"},
+    {"word": "all around the world", "meaning": "전 세계에 걸쳐"},
+    {"word": "tradition", "meaning": "전통"},
+    {"word": "similar", "meaning": "비슷한"},
+    {"word": "turn", "meaning": "돌다, 차례"},
+    {"word": "instead of", "meaning": "~대신에"},
+    {"word": "unlock", "meaning": "잠금을 해제하다"},
+    {"word": "future", "meaning": "미래"},
+    {"word": "holland", "meaning": "네덜란드"},
+    {"word": "receive", "meaning": "받다"},
+    {"word": "gift", "meaning": "선물"},
+    {"word": "such as", "meaning": "~와 같은"},
+    {"word": "insect", "meaning": "곤충"},
+    {"word": "annoying", "meaning": "짜증나는"},
+    {"word": "buzz", "meaning": "윙윙거리다"},
+    {"word": "provide", "meaning": "제공하다"},
+    {"word": "with the help of", "meaning": "~의 도움으로"},
+    {"word": "especially", "meaning": "특히"},
+    {"word": "beetle", "meaning": "딱정벌레"},
+    {"word": "feed on", "meaning": "~을 먹고 살다"},
+    {"word": "fallen", "meaning": "떨어진"},
+    {"word": "thereby", "meaning": "그로 인해"},
+    {"word": "benefit", "meaning": "이익, 혜택"},
+    {"word": "disadvantage", "meaning": "불이익"},
+    {"word": "dangerous", "meaning": "위험한"},
+    {"word": "blink", "meaning": "눈을 깜빡이다"},
+    {"word": "look away", "meaning": "시선을 돌리다"},
+    {"word": "reason", "meaning": "이유"},
+    {"word": "distinguish", "meaning": "구별하다"},
+    {"word": "response", "meaning": "응답, 반응"},
+    {"word": "come up with", "meaning": "생각해내다"},
+    {"word": "still", "meaning": "여전히, 고요한"},
+    {"word": "lie down", "meaning": "눕다"},
+    {"word": "couch", "meaning": "소파"},
+    {"word": "stare", "meaning": "응시하다"},
+    {"word": "sniff", "meaning": "냄새를 맡다"},
+    {"word": "suddenly pain", "meaning": "갑작스러운 통증"},
+    {"word": "stomach", "meaning": "위, 배"},
+    {"word": "visit", "meaning": "방문하다"},
+    {"word": "right away", "meaning": "즉시"},
+    {"word": "surgery", "meaning": "수술"},
+    {"word": "sick in bed", "meaning": "병상에 누워 있는"},
+    {"word": "indeed", "meaning": "정말로"},
+    {"word": "awake", "meaning": "깨어 있는"},
+    {"word": "alive", "meaning": "살아 있는"},
+    {"word": "recover", "meaning": "회복하다"},
+    {"word": "arrive", "meaning": "도착하다"},
+    {"word": "national", "meaning": "국가의"},
+    {"word": "western", "meaning": "서양의"},
+    {"word": "history", "meaning": "역사"},
+    {"word": "the middle ages", "meaning": "중세"},
+    {"word": "non working", "meaning": "작동하지 않는"},
+    {"word": "servant", "meaning": "하인"},
+    {"word": "hard", "meaning": "어려운, 단단한"},
+    {"word": "master", "meaning": "주인, 전문가"},
+    {"word": "share", "meaning": "나누다"},
+    {"word": "in need", "meaning": "필요로 하는"},
+    {"word": "origin", "meaning": "기원"},
+    {"word": "several", "meaning": "여러 개의"},
+    {"word": "avoid", "meaning": "피하다"},
+    {"word": "wait for", "meaning": "~을 기다리다"},
+    {"word": "safely", "meaning": "안전하게"},
+    {"word": "interrupt", "meaning": "방해하다"},
+    {"word": "fall in love with", "meaning": "~와 사랑에 빠지다"},
+    {"word": "find out", "meaning": "알아내다"},
+    {"word": "jealous", "meaning": "질투하는"},
+    {"word": "after a while", "meaning": "잠시 후에"},
+    {"word": "forest", "meaning": "숲"},
+    {"word": "be about to", "meaning": "~하려고 하다"},
+    {"word": "arrow", "meaning": "화살"},
+    {"word": "as well", "meaning": "또한"},
+    {"word": "far", "meaning": "먼"},
+    {"word": "brightly", "meaning": "밝게"},
+    {"word": "north pole", "meaning": "북극"},
+    {"word": "as", "meaning": "~로서, ~처럼"},
+    {"word": "primary", "meaning": "주요한"},
+    {"word": "spice", "meaning": "향신료"},
+    {"word": "add", "meaning": "더하다"},
+    {"word": "flavor", "meaning": "맛"},
+    {"word": "another", "meaning": "또 다른"},
+    {"word": "cure", "meaning": "치료하다"},
+    {"word": "prevent", "meaning": "예방하다"},
+    {"word": "cough", "meaning": "기침"},
+    {"word": "sore", "meaning": "아픈"},
+    {"word": "throat", "meaning": "목구멍"},
+    {"word": "upset stomach", "meaning": "속이 불편한"},
+    {"word": "motion sickness", "meaning": "멀미"},
+    {"word": "etc.", "meaning": "기타 등등"},
+    {"word": "home remedy", "meaning": "가정 요법"},
+    {"word": "a kind of", "meaning": "일종의"},
+    {"word": "barbecued", "meaning": "구운"},
+    {"word": "soldier", "meaning": "군인"},
+    {"word": "sword", "meaning": "검"},
+    {"word": "bald", "meaning": "대머리의"},
+    {"word": "eagle", "meaning": "독수리"},
+    {"word": "contrast", "meaning": "대조"},
+    {"word": "feather", "meaning": "깃털"},
+    {"word": "be born", "meaning": "태어나다"},
+    {"word": "spot", "meaning": "점, 장소"},
+    {"word": "from a distance", "meaning": "멀리서"},
+    {"word": "legally", "meaning": "법적으로"},
+    {"word": "famous", "meaning": "유명한"},
+    {"word": "vision", "meaning": "시력, 환상"},
+    {"word": "foot", "meaning": "발"},
+    {"word": "poor eyesight", "meaning": "시력이 나쁜"},
+    {"word": "set the world record", "meaning": "세계 기록을 세우다"},
+    {"word": "secret", "meaning": "비밀"},
+    {"word": "ability", "meaning": "능력"},
+    {"word": "numerous", "meaning": "수많은"},
+    {"word": "despite", "meaning": "에도 불구하고"},
+    {"word": "due to", "meaning": "~때문에"},
+    {"word": "practice", "meaning": "연습, 실천"},
+    {"word": "honesty", "meaning": "정직"},
+    {"word": "policy", "meaning": "정책"},
+    {"word": "vessel", "meaning": "배, 용기"},
+    {"word": "nearly", "meaning": "거의"},
+    {"word": "during", "meaning": "~동안"},
+    {"word": "war", "meaning": "전쟁"},
+    {"word": "think of", "meaning": "~을 생각하다"},
+    {"word": "clever", "meaning": "영리한"},
+    {"word": "way", "meaning": "방법"},
+    {"word": "keep", "meaning": "유지하다"},
+    {"word": "scrap", "meaning": "조각, 폐기하다"},
+    {"word": "waste", "meaning": "낭비"},
+    {"word": "fat", "meaning": "지방, 뚱뚱한"},
+    {"word": "wartime", "meaning": "전시"},
+    {"word": "meal", "meaning": "식사"},
+    {"word": "even", "meaning": "심지어, 평평한"},
+    {"word": "ridiculous", "meaning": "터무니없는"},
+    {"word": "certain", "meaning": "확실한"},
+    {"word": "condition", "meaning": "조건, 상태"},
+    {"word": "pay attention to", "meaning": "~에 주의를 기울이다"},
+    {"word": "at that time", "meaning": "그 당시"},
+    {"word": "observe", "meaning": "관찰하다"},
+    {"word": "modern", "meaning": "현대의"},
+    {"word": "scientific", "meaning": "과학적인"},
+    {"word": "prove", "meaning": "증명하다"},
+    {"word": "unclear", "meaning": "불분명한"},
+    {"word": "bullfighter", "meaning": "투우사"},
+    {"word": "wild", "meaning": "야생의"},
+    {"word": "bull", "meaning": "황소"},
+    {"word": "afraid", "meaning": "두려워하는"},
+    {"word": "in fact", "meaning": "사실상"},
+    {"word": "red green color blind", "meaning": "적록 색맹"},
+    {"word": "sensitive", "meaning": "민감한"},
+    {"word": "sudden", "meaning": "갑작스러운"},
+    {"word": "movement", "meaning": "움직임"},
+    {"word": "protect", "meaning": "보호하다"},
+    {"word": "themselves", "meaning": "그들 자신"},
+    {"word": "rush", "meaning": "돌진하다"},
+    {"word": "charge", "meaning": "돌격하다, 요금"},
+    {"word": "cape", "meaning": "망토"},
+    {"word": "behavior", "meaning": "행동"},
+    {"word": "beloved", "meaning": "사랑받는"},
+    {"word": "kind", "meaning": "종류, 친절한"},
+    {"word": "appear", "meaning": "나타나다"},
+    {"word": "curious", "meaning": "호기심 많은"},
+    {"word": "upside down", "meaning": "거꾸로 된"},
+    {"word": "branch", "meaning": "가지"},
+    {"word": "tasty", "meaning": "맛있는"},
+    {"word": "anymore", "meaning": "더 이상"},
+    {"word": "package", "meaning": "소포"},
+    {"word": "armchair", "meaning": "안락의자"},
+    {"word": "next to", "meaning": "~옆에"},
+    {"word": "upset", "meaning": "속상한"},
+    {"word": "eventually", "meaning": "결국"},
+    {"word": "divide", "meaning": "나누다"},
+    {"word": "look into", "meaning": "조사하다"},
+    {"word": "strange", "meaning": "이상한"},
+    {"word": "desert", "meaning": "사막"},
+    {"word": "leave", "meaning": "떠나다"},
+    {"word": "nobody", "meaning": "아무도"},
+    {"word": "solve", "meaning": "해결하다"},
+    {"word": "at last", "meaning": "마침내"},
+    {"word": "daytime", "meaning": "낮"},
+    {"word": "remove", "meaning": "제거하다"},
+    {"word": "germ", "meaning": "세균"},
+    {"word": "most", "meaning": "가장 많은"},
+    {"word": "illness", "meaning": "질병"},
+    {"word": "spread", "meaning": "퍼지다"},
+    {"word": "regular", "meaning": "정기적인"},
+    {"word": "habit", "meaning": "습관"},
+    {"word": "about", "meaning": "~에 대해"},
+    {"word": "stay", "meaning": "머무르다"},
+    {"word": "forget", "meaning": "잊다"},
+    {"word": "blow one's nose", "meaning": "코를 풀다"},
+    {"word": "follow", "meaning": "따르다"},
+    {"word": "get sick", "meaning": "아프다"},
+    {"word": "by hands", "meaning": "손으로"},
+    {"word": "communicate", "meaning": "소통하다"},
+    {"word": "each other", "meaning": "서로"},
+    {"word": "language", "meaning": "언어"},
+    {"word": "sentence", "meaning": "문장"},
+    {"word": "carefully", "meaning": "조심스럽게"},
+    {"word": "unique", "meaning": "독특한"},
+    {"word": "believe", "meaning": "믿다"},
+    {"word": "suitcase", "meaning": "여행 가방"},
+    {"word": "unfortunately", "meaning": "불행히도"},
+    {"word": "aboard", "meaning": "탑승하여"},
+    {"word": "baggage", "meaning": "수하물"},
+    {"word": "culture", "meaning": "문화"},
+    {"word": "myth", "meaning": "신화"},
+    {"word": "symbol", "meaning": "상징"},
+    {"word": "magical", "meaning": "마법의"},
+    {"word": "evil", "meaning": "악한"},
+    {"word": "fear", "meaning": "두려움"},
+    {"word": "effect", "meaning": "효과"},
+    {"word": "develop", "meaning": "발달하다"},
+    {"word": "experiment", "meaning": "실험"},
+    {"word": "result", "meaning": "결과"},
+    {"word": "pregnant", "meaning": "임신한"},
+    {"word": "growth", "meaning": "성장"},
+    {"word": "importance", "meaning": "중요성"},
+    {"word": "throughout", "meaning": "도처에"},
+    {"word": "dough", "meaning": "반죽"},
+    {"word": "slightly", "meaning": "약간"},
+    {"word": "birth", "meaning": "출생"},
+    {"word": "by accident", "meaning": "우연히"},
+    {"word": "expect", "meaning": "기대하다"},
+    {"word": "nest", "meaning": "둥지"},
+    {"word": "emperor penguin", "meaning": "황제 펭귄"},
+    {"word": "look for", "meaning": "찾다"},
+    {"word": "hold", "meaning": "잡다"},
+    {"word": "antarctica", "meaning": "남극"},
+    {"word": "freezing", "meaning": "얼어붙는"},
+    {"word": "side by side", "meaning": "나란히"},
+    {"word": "take care of", "meaning": "돌보다"},
+    {"word": "tell time", "meaning": "시간을 말하다"},
+    {"word": "these days", "meaning": "요즘"},
+    {"word": "past", "meaning": "과거"},
+    {"word": "at first", "meaning": "처음에"},
+    {"word": "sundial", "meaning": "해시계"},
+    {"word": "pointer", "meaning": "지시자"},
+    {"word": "fill", "meaning": "채우다"},
+    {"word": "fall", "meaning": "떨어지다"},
+    {"word": "flow", "meaning": "흐르다"},
+    {"word": "burn", "meaning": "타다"},
+    {"word": "go by", "meaning": "지나가다"},
+    {"word": "explorer", "meaning": "탐험가"},
+    {"word": "voyage", "meaning": "항해"},
+    {"word": "across", "meaning": "가로질러"},
+    {"word": "set out", "meaning": "출발하다"},
+    {"word": "journey", "meaning": "여행"},
+    {"word": "return", "meaning": "돌아오다"},
+    {"word": "cargo", "meaning": "화물"},
+    {"word": "settlement", "meaning": "정착지"},
+    {"word": "pirate", "meaning": "해적"},
+    {"word": "mind", "meaning": "마음"},
+    {"word": "set up", "meaning": "설치하다"},
+    {"word": "land", "meaning": "땅"},
+    {"word": "drown", "meaning": "익사하다"},
+    {"word": "escape", "meaning": "탈출하다"},
+    {"word": "enemy", "meaning": "적"},
+    {"word": "beak", "meaning": "부리"},
+    {"word": "tightly", "meaning": "단단히"},
+    {"word": "sharp", "meaning": "날카로운"},
+    {"word": "parrot", "meaning": "앵무새"},
+    {"word": "shell", "meaning": "껍질"},
+    {"word": "stick to", "meaning": "붙다"},
+    {"word": "boil", "meaning": "끓이다"},
+    {"word": "natural", "meaning": "자연적인"},
+    {"word": "sugary", "meaning": "달콤한"},
+    {"word": "introduce", "meaning": "소개하다"},
+    {"word": "get out", "meaning": "나가다"},
+    {"word": "in the end", "meaning": "결국"},
+    {"word": "reply", "meaning": "대답하다"},
+    {"word": "keep v-ing", "meaning": "~을 계속하다"},
+    {"word": "solid", "meaning": "단단한"},
+    {"word": "dairy product", "meaning": "유제품"},
+    {"word": "one-third", "meaning": "3분의 1"},
+    {"word": "prepare", "meaning": "준비하다"},
+    {"word": "amount", "meaning": "양"},
+    {"word": "dissolve", "meaning": "녹이다"},
+    {"word": "both", "meaning": "둘 다"},
+    {"word": "at all", "meaning": "전혀"},
+    {"word": "lower", "meaning": "낮추다"},
+    {"word": "freezing point", "meaning": "빙점"},
+    {"word": "in groups", "meaning": "그룹으로"},
+    {"word": "raise", "meaning": "올리다, 기르다"},
+    {"word": "attack", "meaning": "공격하다"},
+    {"word": "social", "meaning": "사회적인"},
+    {"word": "stressful", "meaning": "스트레스를 주는"},
+    {"word": "charity", "meaning": "자선"},
+    {"word": "imagine", "meaning": "상상하다"},
+    {"word": "available", "meaning": "이용 가능한"},
+    {"word": "stream", "meaning": "시내, 흐름"},
+    {"word": "wash away", "meaning": "씻어내다"},
+    {"word": "dirt", "meaning": "흙, 더러움"},
+    {"word": "regularly", "meaning": "정기적으로"},
+    {"word": "afford", "meaning": "감당하다"},
+    {"word": "century", "meaning": "세기"},
+    {"word": "common", "meaning": "흔한"},
+    {"word": "among", "meaning": "~사이에"},
+    {"word": "goose bumps", "meaning": "소름"},
+    {"word": "bump", "meaning": "충돌, 융기"},
+    {"word": "spring up", "meaning": "갑자기 나타나다"},
+    {"word": "whenever", "meaning": "언제나"},
+    {"word": "experience", "meaning": "경험"},
+    {"word": "pleasure", "meaning": "기쁨"},
+    {"word": "automatic", "meaning": "자동적인"},
+    {"word": "reaction", "meaning": "반응"},
+    {"word": "pluck", "meaning": "뽑다"},
+    {"word": "species", "meaning": "종"},
+    {"word": "theory", "meaning": "이론"},
+    {"word": "as a result", "meaning": "결과적으로"},
+    {"word": "get used to", "meaning": "~에 익숙해지다"},
+    {"word": "whale", "meaning": "고래"},
+    {"word": "enormous", "meaning": "거대한"},
+    {"word": "mammal", "meaning": "포유류"},
+    {"word": "lay", "meaning": "눕히다, 낳다"},
+    {"word": "give birth to", "meaning": "~을 낳다"},
+    {"word": "have in common", "meaning": "공통점이 있다"},
+    {"word": "temperature", "meaning": "온도"},
+    {"word": "cold-blooded", "meaning": "냉혈의"},
+    {"word": "living thing", "meaning": "생물"},
+    {"word": "take~for granted", "meaning": "~을 당연하게 여기다"},
+    {"word": "sonder", "meaning": "낯선 사람들의 삶에 대한 깨달음"},
+    {"word": "disease", "meaning": "질병"},
+    {"word": "clothes", "meaning": "옷"},
+    {"word": "produce", "meaning": "생산하다"},
+    {"word": "oxygen", "meaning": "산소"},
+    {"word": "without", "meaning": "~없이"},
+    {"word": "salmon", "meaning": "연어"},
+    {"word": "freshwater", "meaning": "민물"},
+    {"word": "once", "meaning": "한 번"},
+    {"word": "continue", "meaning": "계속하다"},
+    {"word": "up to", "meaning": "~까지"},
+    {"word": "be ready to", "meaning": "~할 준비가 되다"},
+    {"word": "undergo", "meaning": "겪다"},
+    {"word": "physical", "meaning": "신체적인"},
+    {"word": "surprisingly", "meaning": "놀랍게도"},
+    {"word": "make one's way to", "meaning": "~로 가다"},
+    {"word": "in order to", "meaning": "~하기 위해"},
+    {"word": "exact", "meaning": "정확한"},
+    {"word": "mechanism", "meaning": "기제"},
+    {"word": "sense", "meaning": "감각"},
+    {"word": "recognize", "meaning": "인식하다"}
+]
+
+// 전역 변수
+let currentPage = 1;
+const wordsPerPage = 10;
+let quizQuestions = [];
+let currentQuizQuestion = 0;
+let score = 0;
+let selectedOption = null;
+let totalStudyTime = 0;
+let wordsStudied = new Set();
+let totalAnswered = 0;
+let totalCorrect = 0;
+
+// DOM 요소
+const nextBtn = document.getElementById('nextBtn');
+const restartBtn = document.getElementById('restartBtn');
+const restartBtnResult = document.getElementById('restartBtnResult');
+
+// 단어 목록 로드 및 렌더링
+function loadWords(searchQuery = '') {
+    const filteredWords = greWords.filter(word => {
+        if (!searchQuery) return true;
+        const query = searchQuery.toLowerCase();
+        return word.word.toLowerCase().includes(query) || 
+               word.meaning.toLowerCase().includes(query);
+    });
+    
+    const totalPages = Math.ceil(filteredWords.length / wordsPerPage);
+    
+    if (currentPage > totalPages) {
+        currentPage = totalPages || 1;
+    }
+    
+    const startIndex = (currentPage - 1) * wordsPerPage;
+    const endIndex = startIndex + wordsPerPage;
+    const wordsToShow = filteredWords.slice(startIndex, endIndex);
+    
+    renderWords(wordsToShow);
+    renderPagination(totalPages);
+}
+
+// 단어 목록 렌더링
+function renderWords(words) {
+    const wordList = document.getElementById('wordList');
+    wordList.innerHTML = '';
+    
+    if (words.length === 0) {
+        wordList.innerHTML = '<p class="no-results">검색 결과가 없습니다.</p>';
+        return;
+    }
+    
+    words.forEach(word => {
+        const wordCard = document.createElement('div');
+        wordCard.className = 'word-card';
+        wordCard.innerHTML = `
+            <h3>${word.word}</h3>
+            <div class="meaning">${word.meaning}</div>
+        `;
+        
+        wordCard.addEventListener('click', () => {
+            wordsStudied.add(word.word);
+            saveStats();
+            wordCard.style.backgroundColor = 'rgba(67, 97, 238, 0.1)';
+            setTimeout(() => {
+                wordCard.style.backgroundColor = '';
+            }, 300);
+        });
+        
+        wordList.appendChild(wordCard);
+    });
+}
+
+// 페이지네이션 렌더링
+function renderPagination(totalPages) {
+    const pagination = document.getElementById('pagination');
+    pagination.innerHTML = '';
+    
+    if (totalPages <= 1) return;
+    
+    if (currentPage > 1) {
+        const prevBtn = document.createElement('button');
+        prevBtn.innerHTML = '<i class="fas fa-chevron-left"></i>';
+        prevBtn.addEventListener('click', goToPreviousPage);
+        pagination.appendChild(prevBtn);
+    }
+    
+    const maxPageButtons = 5;
+    let startPage = Math.max(1, currentPage - Math.floor(maxPageButtons / 2));
+    let endPage = Math.min(totalPages, startPage + maxPageButtons - 1);
+    
+    if (endPage - startPage + 1 < maxPageButtons) {
+        startPage = Math.max(1, endPage - maxPageButtons + 1);
+    }
+    
+    for (let i = startPage; i <= endPage; i++) {
+        const pageBtn = document.createElement('button');
+        pageBtn.textContent = i;
+        if (i === currentPage) {
+            pageBtn.classList.add('active');
+        }
+        pageBtn.addEventListener('click', () => {
+            currentPage = i;
+            loadWords(document.querySelector('.search-input').value);
+        });
+        pagination.appendChild(pageBtn);
+    }
+    
+    if (currentPage < totalPages) {
+        const nextBtn = document.createElement('button');
+        nextBtn.innerHTML = '<i class="fas fa-chevron-right"></i>';
+        nextBtn.addEventListener('click', goToNextPage);
+        pagination.appendChild(nextBtn);
+    }
+}
+
+// 페이지 이동 함수
+function goToPreviousPage() {
+    currentPage--;
+    loadWords(document.querySelector('.search-input').value);
+}
+
+function goToNextPage() {
+    currentPage++;
+    loadWords(document.querySelector('.search-input').value);
+}
+
+// 탭 전환 기능
+function initTabs() {
+    const tabBtns = document.querySelectorAll('.tab-btn');
+    const contents = document.querySelectorAll('.content');
+    
+    tabBtns.forEach(btn => {
+        btn.addEventListener('click', (event) => {
+            event.stopPropagation();
+            const tabId = btn.getAttribute('data-tab');
+
+            tabBtns.forEach(b => b.classList.remove('active'));
+            contents.forEach(c => c.classList.remove('active'));
+
+            btn.classList.add('active');
+            document.getElementById(tabId).classList.add('active');
+
+            if (tabId === 'word-list') {
+                loadWords();
+            } else if (tabId === 'quiz') {
+                document.querySelector('.quiz-header').style.display = 'flex';
+                document.querySelector('.quiz-question').style.display = 'block';
+                document.querySelector('.quiz-options').style.display = 'grid';
+                document.querySelector('.quiz-actions').style.display = 'flex';
+                document.getElementById('results').style.display = 'none';
+                nextBtn.style.display = 'block';
+                restartBtn.style.display = 'none';
+                
+                score = 0;
+                currentQuizQuestion = 0;
+                selectedOption = null;
+                generateQuizQuestions();
+                showQuestion(0);
+                updateScore();
+            } else if (tabId === 'stats') {
+                loadStats();
+            }
+        });
+    });
+}
+
+// 퀴즈 질문 생성
+function generateQuizQuestions() {
+    quizQuestions = [];
+    const shuffledWords = [...greWords].sort(() => 0.5 - Math.random());
+    const selectedWords = shuffledWords.slice(0, 10);
+    
+    selectedWords.forEach(word => {
+        const options = [word.meaning];
+        while (options.length < 4) {
+            const randomWord = greWords[Math.floor(Math.random() * greWords.length)];
+            if (!options.includes(randomWord.meaning) && randomWord.word !== word.word) {
+                options.push(randomWord.meaning);
+            }
+        }
+        options.sort(() => 0.5 - Math.random());
+        
+        quizQuestions.push({
+            question: word.word,
+            correct: word.meaning,
+            options: options
+        });
+    });
+}
+
+// 퀴즈 질문 표시
+function showQuestion(index) {
+    const questionText = document.getElementById('questionText');
+    const optionsContainer = document.getElementById('options');
+    const feedback = document.getElementById('feedback');
+    
+    feedback.style.display = 'none';
+    feedback.className = 'quiz-feedback';
+    
+    const question = quizQuestions[index];
+    questionText.textContent = `다음 단어의 의미는 무엇인가요? "${question.question}"`;
+    document.getElementById('currentQuestion').textContent = index + 1;
+    document.getElementById('totalQuestions').textContent = quizQuestions.length;
+    
+    optionsContainer.innerHTML = '';
+    question.options.forEach(option => {
+        const optionDiv = document.createElement('div');
+        optionDiv.className = 'quiz-option';
+        optionDiv.textContent = option;
+        optionDiv.addEventListener('click', () => {
+            if (selectedOption) return;
+            selectedOption = option;
+            optionDiv.classList.add('selected');
+            
+            totalAnswered++;
+            if (option === question.correct) {
+                score++;
+                totalCorrect++;
+                optionDiv.classList.add('correct');
+                feedback.textContent = '정답입니다!';
+                feedback.className = 'quiz-feedback correct';
+            } else {
+                optionDiv.classList.add('incorrect');
+                feedback.textContent = `오답입니다. 정답은 "${question.correct}"입니다.`;
+                feedback.className = 'quiz-feedback incorrect';
+            }
+            feedback.style.display = 'block';
+            updateScore();
+            saveStats();
+        });
+        optionsContainer.appendChild(optionDiv);
+    });
+}
+
+// 다음 문제로 이동
+function nextQuestion() {
+    if (!selectedOption) {
+        alert('답을 선택해주세요!');
+        return;
+    }
+
+    currentQuizQuestion++;
+    selectedOption = null;
+    
+    if (currentQuizQuestion < quizQuestions.length) {
+        showQuestion(currentQuizQuestion);
+    } else {
+        showResults();
+    }
+}
+
+// 퀴즈 결과 표시
+function showResults() {
+    const results = document.getElementById('results');
+    results.style.display = 'block';
+    
+    document.getElementById('finalScore').textContent = score;
+    document.getElementById('maxScore').textContent = quizQuestions.length;
+    
+    const percentage = (score / quizQuestions.length) * 100;
+    let message = '';
+    
+    if (percentage >= 90) {
+        message = '훌륭합니다! 완벽에 가까운 점수입니다.';
+    } else if (percentage >= 70) {
+        message = '잘했습니다! 대부분의 문제를 맞혔습니다.';
+    } else if (percentage >= 50) {
+        message = '좋은 시도입니다. 더 연습하면 더 좋아질 것입니다.';
+    } else {
+        message = '더 많은 학습이 필요합니다. 단어장을 다시 복습해보세요.';
+    }
+    
+    document.getElementById('resultMessage').textContent = message;
+    
+    document.querySelector('.quiz-header').style.display = 'none';
+    document.querySelector('.quiz-question').style.display = 'none';
+    document.querySelector('.quiz-options').style.display = 'none';
+    document.querySelector('.quiz-feedback').style.display = 'none';
+    document.querySelector('.quiz-actions').style.display = 'none';
+}
+
+// 퀴즈 다시 시작
+function restartQuiz() {
+    document.getElementById('results').style.display = 'none';
+    document.querySelector('.quiz-header').style.display = 'flex';
+    document.querySelector('.quiz-question').style.display = 'block';
+    document.querySelector('.quiz-options').style.display = 'grid';
+    document.querySelector('.quiz-actions').style.display = 'flex';
+    
+    nextBtn.style.display = 'block';
+    restartBtn.style.display = 'none';
+    
+    score = 0;
+    currentQuizQuestion = 0;
+    selectedOption = null;
+    generateQuizQuestions();
+    showQuestion(0);
+    updateScore();
+}
+
+// 점수 업데이트
+function updateScore() {
+    document.getElementById('score').textContent = score;
+}
+
+// 퀴즈 초기화
+function initQuiz() {
+    nextBtn.addEventListener('click', nextQuestion);
+    restartBtn.addEventListener('click', restartQuiz);
+    restartBtnResult.addEventListener('click', restartQuiz);
+    
+    generateQuizQuestions();
+    showQuestion(0);
+}
+
+// 통계 저장 및 로드
+function saveStats() {
+    const stats = {
+        totalStudyTime: totalStudyTime,
+        totalWordsStudied: wordsStudied.size,
+        accuracy: totalAnswered > 0 ? Math.round((totalCorrect / totalAnswered) * 100) : 0
+    };
+    localStorage.setItem('greStats', JSON.stringify(stats));
+}
+
+function loadStats() {
+    const stats = JSON.parse(localStorage.getItem('greStats')) || {
+        totalStudyTime: 0,
+        totalWordsStudied: 0,
+        accuracy: 0
+    };
+    totalStudyTime = 0; // 앱 로드 시 학습 시간을 0으로 초기화
+    totalWordsStudied = new Set(stats.totalWordsStudied ? Array.from(wordsStudied) : []);
+    totalCorrect = stats.accuracy > 0 ? Math.round((stats.accuracy / 100) * totalAnswered) : 0;
+    
+    document.getElementById('totalStudyTime').textContent = totalStudyTime;
+    document.getElementById('totalWordsStudied').textContent = wordsStudied.size;
+    document.getElementById('accuracy').textContent = stats.accuracy;
+}
+
+function updateStudyTime() {
+    totalStudyTime += 5; // 5분마다 증가
+    saveStats();
+    document.getElementById('totalStudyTime').textContent = totalStudyTime;
+}
+
+// 초기화
+document.addEventListener('DOMContentLoaded', function() {
+    loadWords();
+    initTabs();
+    initQuiz();
+    loadStats();
+    
+    const searchInput = document.querySelector('.search-input');
+    searchInput.addEventListener('input', function() {
+        currentPage = 1;
+        loadWords(this.value);
+    });
+    
+    // 5분마다 학습 시간 자동 업데이트
+    setInterval(updateStudyTime, 300000);
+});
+    
+    </script>
+</body>
+</html>
