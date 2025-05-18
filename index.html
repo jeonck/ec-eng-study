@@ -1013,7 +1013,7 @@ function initTabs() {
 function generateQuizQuestions() {
     quizQuestions = [];
     const shuffledWords = [...greWords].sort(() => 0.5 - Math.random());
-    const selectedWords = shuffledWords.slice(0, 10);
+    const selectedWords = shuffledWords.slice(0, 100);
     
     selectedWords.forEach(word => {
         const options = [word.meaning];
